@@ -1,26 +1,15 @@
-# Implement bubble sort here
-# Input arguments:
-#	$a0 - starting memory address of the array to be sorted
-#	$a1 - number of elements in array
-# More information about bubble sort can be found here:
-# http://en.wikipedia.org/wiki/Bubble_sort
-
 bubble_sort:
-	#set a variable to store current position in array number
 	move $v0, $ra #allow jal's
 setupPass:
-	li $s0, 0 #index of number being compared to (changes each Pass)
-	li $s1, 1 #index of number being compared on (changes each Pass)
-	li $s4, 0	
+	addiu $s0, $0, 0 #index of number being compared to (changes each Pass)
+	addiu $s1, $0, 1 #index of number being compared on (changes each Pass)
+	addiu $s4, $0, 0	
 	jal getNumber
 	nop
 	j doPass
 	nop
-
-getNumber:
-	#input- index1=$s0, index2= $s1 memoryAddress=$a0  
-	#output- actualNumber1=$s2, actualNumber2=$s3
-	li $t4, 4
+getNumber: 	#input- index1=$s0, index2= $s1 memoryAddress=$a0  	#output- actualNumber1=$s2, actualNumber2=$s3
+	addiu $t4, $0, 4
 	mullo $t3, $t4, $s0
 	addu $t2, $t3, $a0
 	lw $s2, 0($t2)
@@ -29,21 +18,16 @@ getNumber:
 	lw $s3, 0($t2)
 	jr $ra
 	nop
-
 doPass: #input- $s4,
-	#test if we are done
-	beq $s1, $a1, passDone
+	beq $s1, $a1, passDone	#test if we are done
 	nop
-	
 	jal getNumber
 	nop
-
 	slt $t0, $s3, $s2
 	beq $t0, $0, dontSwap
 	nop
-		#SWAPPPPP
-		li $s4, 1 #set swap register
-		li $t4, 4
+		addiu $s4, $0, 1 #set swap register
+		addiu $t4, $0, 4
 		mullo $t3, $t4, $s1
 		addu $t2, $t3, $a0
 		sw $s2, 0($t2)
@@ -51,24 +35,19 @@ doPass: #input- $s4,
 		mullo $t3, $t4, $s0
 		addu $t2, $t3, $a0
 		sw $s3, 0($t2)
-
 	dontSwap:
-	##increase index
-	li $t0 1
+	addiu $t0, $0, 1
 	addu $s0, $s0, $t0
 	addu $s1, $s1, $t0
-	
 	j doPass
 	nop
-
 passDone:
-	beq $s4, $0, done #test if swap bit is low, if so then we are
+	bne $s4, $0, notDone #test if swap bit is low, if so then we are
 	nop
-	li $t0, 1
+		move $ra, $v0
+		return 
+	notDone:
+	addiu $t0, $0, 1
 	addu $s0, $t0, $s0 #increment main pass index
 	j setupPass
-	nop
-done:
-	move $ra, $v0
-	return 
 	nop
