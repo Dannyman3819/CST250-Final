@@ -1,0 +1,92 @@
+# Implement insertion sort here
+# Input arguments:
+#	$a0 - starting memory address of the array to be sorted
+#	$a1 - number of elements in array
+# More information about insertion sort can be found here:
+# http://en.wikipedia.org/wiki/Insertion_sort
+
+#$v0 – RETURN ADDRESS
+#$t0 – INCREMENTER (4)
+#$t1 – COMPARISON SLTU STORAGE
+#$t2 – TEMP STORAGE FOR ELSE LOOP OF INNER LOOP
+#$t5
+#$s0 – MAIN INCREMENTAL COUNTER
+#$s1 – SECOND DECREMENTING COUNTER INNER LOOP
+#$s2 – FLAG
+#$s3 – FIRST VALUE
+#$s4 – SECOND VALUE
+
+insertion_sort:
+	move $v0, $ra		# Copy our return address so at very end we can move back
+
+buildIt:
+	addu $s0, $s0, $0		# Counter (for setting a0 back) = 0
+	#State = 0
+	addiu $t0, $t0, 4		# Incrementer = 4
+	li $s1, 1			# Secondary counter = 1; initializing.
+	#First value = 0
+	#Second value = 0
+
+# to retrieve position of our $a0 jumps, we multiply incrementer by counter,
+# then subtract that value from our $a0 to return to original location
+
+bigBody:
+	beq $s0, $a1, endReturn		#if (counter == $a1) 	# we have fully gone through list
+	# no need of nop, lets execute next instruction		# 	J endReturn	# if we fully went through list, we fully sorted list
+
+	# Maybe counter may start at 1 rather 0, but its better to do 1 cause 1 means a jump of 4, if we start at 1 then this will turn into 2
+	# which means we do a jump of 8, when our first iteration is only a jump of 4 from starting address.	
+
+	li $s2, 0				# addu $s2, $s2, $0		# Flag = 0
+	#addiu $s0, $s0, 1			#Counter = counter + 1	# counter defaults to 1, because we will
+	#mullo $t5, $t0, $s0
+	lw $s3, 0($a0)			#First value = 0($a0)	# add 4 to our $a0 for first swap comparison
+	addiu $s0, $s0, 1			#Counter = counter + 1	# counter defaults to 1, because we will
+	mullo $t5, $t0, $s0
+	addu $a0, $a0, $t5				
+	#addu $a0, $a0, $t0			#$a0 = $a0 + incrementer	# increment ourselves up,
+	lw $s4, 0($a0)				# Second value = 0($a0)
+	sltu $s2, $s4, $s3				# If (second value < first value)
+						#	Flag = 1
+	bne $s2, $0, swaparoo			#	If (flag > 0)
+	nop					#	J swap
+						# Else
+	j bigBody				# lets go back and get the next values cause
+	nop					# we have no flags.
+
+swaparoo:
+# We may not need state, because the inner loop else statement will restore our 
+# position technically.	
+						#State = counter * incrementer	# Save our state so we can continue on from 
+	# For swapping, we just go 4 back and store the comparing value which is $s4,
+	# and we put the compared value to 4 forward, which is 0($a0).
+	sw $s4, -4($a0)				# Perform swap			# our state
+	sw $s3, 0($a0)				
+	li $s2, 0					# Flag = 0
+
+# inner loop resets itself after its done arranging array, it’s convenient because it allows 
+# traversal of the original array as a sub array without altering original array, and we 
+# restore our address of $a0 with the secondary counter in temp in else loop.
+
+reverseTraverse:
+	#Secondary counter = 2 by DEFAULT
+	addiu $s1, $s1, 1 				# Secondary Counter = secondary + 1
+	#subu $a0, $a0, $t0				#$a0 = $a0 - incrementer	# because we decremented, we can load from 0 
+	lw $s3, 0($a0)				# First value = 0($a0)	# jump
+	subu $a0, $a0, $t0				# $a0 = $a0 - incrementer
+	lw $s4, 0($a0)				# Second value = 0($a0)
+	sltu $s2, $s4, $s3				# If (second value < first value)
+	bne $s2, $0, swaparoo			#	Flag = 1
+						# If (flag > 0)
+	# no nop because i want it to exexcute		#	J swap					
+	# the next line instead.			# else we dont need to continue on with insertion sort process
+	mullo $t2, $s1, $t0				# Temp = secondary counter * 4	# retrieve the current left off state
+	addu $a0, $a0, $t2					#  $a0 = $a0 + temp		# restore our address
+	j bigBody
+	li $s1, 1				#Secondary counter = 1;	# Restore our secondary counter, ONCE AGAIN NO NOP
+	# to 1 by default, because we want to 
+	# be able to multiply by 4, if we start at 0 we always get 0.
+
+endReturn:
+	move $ra, $v0				# move our return address back
+	return					# return to other asm’s
