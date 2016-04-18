@@ -2,8 +2,6 @@ bubble_sort:
 	addiu $s0, $0, 0 #index of number being compared to (changes each Pass)
 	addiu $s1, $0, 1 #index of number being compared on (changes each Pass)
 	addiu $s4, $0, 0	
-	j doPass
-	nop
 doPass: #input- $s4,
 	beq $s1, $a1, passDone	#test if we are done
 	nop
