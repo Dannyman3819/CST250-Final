@@ -1,6 +1,4 @@
 bubble_sort:
-	move $v0, $ra #allow jal's
-setupPass:
 	addiu $s0, $0, 0 #index of number being compared to (changes each Pass)
 	addiu $s1, $0, 1 #index of number being compared on (changes each Pass)
 	addiu $s4, $0, 0	
@@ -36,7 +34,6 @@ doPass: #input- $s4,
 passDone:
 	bne $s4, $0, notDone #test if swap bit is low, if so then we are
 	nop
-		move $ra, $v0
 		return 
 	notDone:
 	addiu $t0, $0, 1
