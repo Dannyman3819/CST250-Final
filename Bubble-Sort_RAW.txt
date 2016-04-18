@@ -38,5 +38,5 @@ passDone:
 	notDone:
 	addiu $t0, $0, 1
 	addu $s0, $t0, $s0 #increment main pass index
-	j setupPass
+	j bubble_sort
 	nop
