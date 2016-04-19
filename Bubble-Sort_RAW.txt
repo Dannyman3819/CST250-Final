@@ -1,28 +1,17 @@
 bubble_sort:
-	move $v0, $ra #allow jal's
-setupPass:
 	addiu $s0, $0, 0 #index of number being compared to (changes each Pass)
 	addiu $s1, $0, 1 #index of number being compared on (changes each Pass)
 	addiu $s4, $0, 0	
-	jal getNumber
+doPass: #input- $s4,
+	beq $s1, $a1, passDone	#test if we are done
 	nop
-	j doPass
-	nop
-getNumber: 	#input- index1=$s0, index2= $s1 memoryAddress=$a0  	#output- actualNumber1=$s2, actualNumber2=$s3
-	addiu $t4, $0, 4
+	addiu $t4, $0, 4 #start getting number
 	mullo $t3, $t4, $s0
 	addu $t2, $t3, $a0
 	lw $s2, 0($t2)
 	mullo $t3, $t4, $s1
 	addu $t2, $t3, $a0
 	lw $s3, 0($t2)
-	jr $ra
-	nop
-doPass: #input- $s4,
-	beq $s1, $a1, passDone	#test if we are done
-	nop
-	jal getNumber
-	nop
 	slt $t0, $s3, $s2
 	beq $t0, $0, dontSwap
 	nop
@@ -31,7 +20,6 @@ doPass: #input- $s4,
 		mullo $t3, $t4, $s1
 		addu $t2, $t3, $a0
 		sw $s2, 0($t2)
-
 		mullo $t3, $t4, $s0
 		addu $t2, $t3, $a0
 		sw $s3, 0($t2)
@@ -44,10 +32,9 @@ doPass: #input- $s4,
 passDone:
 	bne $s4, $0, notDone #test if swap bit is low, if so then we are
 	nop
-		move $ra, $v0
 		return 
 	notDone:
 	addiu $t0, $0, 1
 	addu $s0, $t0, $s0 #increment main pass index
-	j setupPass
+	j bubble_sort
 	nop

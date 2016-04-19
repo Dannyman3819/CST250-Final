@@ -5,88 +5,138 @@
 # More information about insertion sort can be found here:
 # http://en.wikipedia.org/wiki/Insertion_sort
 
+
 #$v0 – RETURN ADDRESS
-#$t0 – INCREMENTER (4)
+#$t0 – COMPARISON VALUE FOR SWAPPING
 #$t1 – COMPARISON SLTU STORAGE
-#$t2 – TEMP STORAGE FOR ELSE LOOP OF INNER LOOP
-#$t5
-#$s0 – MAIN INCREMENTAL COUNTER
-#$s1 – SECOND DECREMENTING COUNTER INNER LOOP
-#$s2 – FLAG
-#$s3 – FIRST VALUE
-#$s4 – SECOND VALUE
+#$t2 – COPY OF ARRAY FROM $a0
+#$t3 – MULTIPLIER INDEX LOCATION
+#$t4 – INCREMENTER (4)
+#$t3 - MULTIPLIER OF INDEX
+#$t6 - VALUE OF 1
+#$t7 - SWAP REGISTER
+#$s0 – FIRST VALUE INDEX
+#$s1 – SECOND VALUE INDEX
+#$s2 - ACTUAL FIRST VALUE
+#$s3 - ACTUAL SECOND VALUE
+#$s4 – FLAG FOR SWAPPING
+#$s5  – REVERSE FIRST VALUE
+#$s6 – REVERSE SECOND VALUE
 
-insertion_sort:
-	move $v0, $ra		# Copy our return address so at very end we can move back
 
-buildIt:
-	addu $s0, $s0, $0		# Counter (for setting a0 back) = 0
-	#State = 0
-	addiu $t0, $t0, 4		# Incrementer = 4
-	li $s1, 1			# Secondary counter = 1; initializing.
-	#First value = 0
-	#Second value = 0
+insertion_sort: 
+	addiu $s0, $0, 0
+	addiu $s1, $0, 1
+	addiu $s4, $0, 0
+getInsertionNumber:
 
-# to retrieve position of our $a0 jumps, we multiply incrementer by counter,
-# then subtract that value from our $a0 to return to original location
+	beq $s1, $a1, finishIt		# Test if we are done by having $s1 index at end.
+	nop 
 
-bigBody:
-	beq $s0, $a1, endReturn		#if (counter == $a1) 	# we have fully gone through list
-	# no need of nop, lets execute next instruction		# 	J endReturn	# if we fully went through list, we fully sorted list
+	addiu $t4, $0, 4			# Initialize our incrementer with value 4.
 
-	# Maybe counter may start at 1 rather 0, but its better to do 1 cause 1 means a jump of 4, if we start at 1 then this will turn into 2
-	# which means we do a jump of 8, when our first iteration is only a jump of 4 from starting address.	
+	mullo $t3, $t4, $s0			# Multiply to location of our index
 
-	li $s2, 0				# addu $s2, $s2, $0		# Flag = 0
-	#addiu $s0, $s0, 1			#Counter = counter + 1	# counter defaults to 1, because we will
-	#mullo $t5, $t0, $s0
-	lw $s3, 0($a0)			#First value = 0($a0)	# add 4 to our $a0 for first swap comparison
-	addiu $s0, $s0, 1			#Counter = counter + 1	# counter defaults to 1, because we will
-	mullo $t5, $t0, $s0
-	addu $a0, $a0, $t5				
-	#addu $a0, $a0, $t0			#$a0 = $a0 + incrementer	# increment ourselves up,
-	lw $s4, 0($a0)				# Second value = 0($a0)
-	sltu $s2, $s4, $s3				# If (second value < first value)
-						#	Flag = 1
-	bne $s2, $0, swaparoo			#	If (flag > 0)
-	nop					#	J swap
-						# Else
-	j bigBody				# lets go back and get the next values cause
-	nop					# we have no flags.
+	addu $t2, $t3, $a0			
+# Add value from indexed location determined in $t3, and add that to our original $a0 to get memory
+# location for the value we want to load into our register, we store this memory location in 
+# register $t2, so $t2 has memory location of index for array element.
 
-swaparoo:
-# We may not need state, because the inner loop else statement will restore our 
-# position technically.	
-						#State = counter * incrementer	# Save our state so we can continue on from 
-	# For swapping, we just go 4 back and store the comparing value which is $s4,
-	# and we put the compared value to 4 forward, which is 0($a0).
-	sw $s4, -4($a0)				# Perform swap			# our state
-	sw $s3, 0($a0)				
-	li $s2, 0					# Flag = 0
+	lw $s2, 0($t2)			# Store this memory located element from $a0 into $s2, which is the final first index value.		
 
-# inner loop resets itself after its done arranging array, it’s convenient because it allows 
-# traversal of the original array as a sub array without altering original array, and we 
-# restore our address of $a0 with the secondary counter in temp in else loop.
+# Essentially line above is storing value into the 
+# memory address of $a0 index.
+# Store the value into output index 1.
 
-reverseTraverse:
-	#Secondary counter = 2 by DEFAULT
-	addiu $s1, $s1, 1 				# Secondary Counter = secondary + 1
-	#subu $a0, $a0, $t0				#$a0 = $a0 - incrementer	# because we decremented, we can load from 0 
-	lw $s3, 0($a0)				# First value = 0($a0)	# jump
-	subu $a0, $a0, $t0				# $a0 = $a0 - incrementer
-	lw $s4, 0($a0)				# Second value = 0($a0)
-	sltu $s2, $s4, $s3				# If (second value < first value)
-	bne $s2, $0, swaparoo			#	Flag = 1
-						# If (flag > 0)
-	# no nop because i want it to exexcute		#	J swap					
-	# the next line instead.			# else we dont need to continue on with insertion sort process
-	mullo $t2, $s1, $t0				# Temp = secondary counter * 4	# retrieve the current left off state
-	addu $a0, $a0, $t2					#  $a0 = $a0 + temp		# restore our address
-	j bigBody
-	li $s1, 1				#Secondary counter = 1;	# Restore our secondary counter, ONCE AGAIN NO NOP
-	# to 1 by default, because we want to 
-	# be able to multiply by 4, if we start at 0 we always get 0.
+	mullo $t3, $t4, $s1			# Multiply our second index value by our incrementer of 4 and store that into $t3 (multiplier location)
 
-endReturn:
-	move $ra, $v0				# move our return address back
-	return					# return to other asm’s
+	addu $t2, $t3, $a0			# Add multiplier index location to original array and store that into $t2 as before.
+
+	lw $s3, 0($t2)			# Fully store value into output index 2 for final value.
+
+	slt $t0, $s3, $s2			# Is it the case that $s3 < $s2 $t0 = 1, we perform our check to see if we wish to swap. 
+					# Else we will regather values by incrementing on.
+	beq $t0, $0, dontSwapInsertion
+	nop	
+		addiu $s4, $0, 1		# Initialize swapping register.
+
+		addiu $t4, $0, 4		# May be able to take this portion out.
+
+		mullo $t3, $t4, $s1		# Multiply for index location of second index, which is were we will store the final first value.
+	
+		addu $t2, $t3, $a0		# Add to get to our memory location for first index, to which we will insert final first value.
+	
+		sw $s2, 0($t2)		# Store final first value in memory location of second value.
+					
+		mullo $t3, $t4, $s0		# Multiply to retrieve index location for first index.
+
+		addu $t2, $t3, $a0		# Add incrementer from multiplied index to original array and store to $t2
+
+		sw $s3, 0($t2)		# Store final second value in memory location of first index.
+
+dontSwapInsertion:					# Don't swap is essentially the else statement from our beq $t0, $0, dontSwap conditional.
+# Store final value for location of second value.
+
+	addu $s5, $s0, $0			# Load s5 with s0, 
+	
+	addu $s6, $s0, $0			# Load s6 with s1
+# INCREMENT OUR INDEXES
+	addiu $s0, $s0, 1			# Increment our first index
+	addiu $s1, $s1, 1			# Increment our second index.
+	j getInsertionNumber			# Could take this out for less cycles because getNumber is called before swapping within reverseSwap method.
+	nop
+
+reverse_swap:
+
+		addiu $t4, $0, 4
+#Load s5 with s5-1
+#subu $s5, $s5, $t6 # $t6=1
+#OR
+		addiu $s5, $s5, -1		# Decrement our first index location so we can start going down.
+#Load s6 with s6-1
+#subu $s6, $s6, $t6 #$t6=1
+		addiu $s6, $s6, -1		# Decrement our second index location so we can start going down.
+# May be able to take this portion out.
+		mullo $t3, $t4, $s5		# Multiply our incrementer by first temp index location and store into $t3
+
+		addu $t2, $t3, $a0		# Add multiplied index value to our $a0 to retrieve index location, store into $t2
+
+		lw $s2, 0($t2)		# Store the value into our final first value.
+
+		mullo $t3, $t4, $s6		# Multiply second temp index by incrementer & store into $t3
+		
+		addu $t2, $t3, $a0		# Add multiplier index to our $a0 to retrieve memory value and store into $t2
+		
+		lw $s3, 0($t2)		# Store t2 to our final second index which is $s3
+
+		slt $t0, $s3, $s2		# Perform comparison as before, is our first index greater than second? Swap if so.
+
+      		beq $t0, $0, getInsertionNumber	# If they aren't, we are fully sorted up to this point and can retrieve the new values.
+      		nop			# Else lets swap
+
+		#swapping
+		mullo $t3, $t4, $s6		# Multiply our second temp index by incrementer to retrieve index value.
+
+		addu $t2, $t3, $a0		# Add multiplier index to our $a0 and store into $t2; memory location that is.
+
+		sw $s5, 0($t2)		# Store the first temp index value into $t2 memory location of our second index.
+
+		mullo $t3, $t4, $s5		# Multiply first temp index by our incrementer of 4.
+	
+		addu $t2, $t3, $a0		# Add multiplier index to our original array location and store address into $t2.
+	
+		sw $s6, 0($t2)		# Store second temp value into our first index location.
+
+		j reverse_swap 		# Jump back to our reverse swap to cycle through again and determine if we must continue decrementing.
+		nop		
+finishIt:
+	bne $s4, $0, notDoneYet		# Test if swap bit is low, if so then we are
+	nop
+	return 				# Return back to main program.
+	
+notDoneYet:
+	addiu $t0, $0, 1			# Set our swap determiner to 1.
+	
+	addu $s0, $t0, $s0			# Increment main pass index
+	j insertion_sort
+	nop
