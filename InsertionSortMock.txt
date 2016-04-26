@@ -97,11 +97,11 @@ reverse_swap:
 
 		lw $s2, 0($t2)		# Store the value into our final first value.
 
-		mullo $t3, $t4, $s6		# Multiply second temp index by incrementer & store into $t3
+		#mullo $t3, $t4, $s6		# Multiply second temp index by incrementer & store into $t3
 		
-		addu $t2, $t3, $a0		# Add multiplier index to our $a0 to retrieve memory value and store into $t2
+		#addu $t2, $t3, $a0		# Add multiplier index to our $a0 to retrieve memory value and store into $t2
 		
-		lw $s3, 0($t2)		# Store t2 to our final second index which is $s3
+		lw $s3, 4($t2)		# Store t2 to our final second index which is $s3
 
 		slt $t0, $s3, $s2		# Perform comparison as before, is our first index greater than second? Swap if so.
 
@@ -115,11 +115,11 @@ reverse_swap:
 
 		sw $s5, 0($t2)		# Store the first temp index value into $t2 memory location of our second index.
 
-		mullo $t3, $t4, $s5		# Multiply first temp index by our incrementer of 4.
+		#mullo $t3, $t4, $s5		# Multiply first temp index by our incrementer of 4.
 	
-		addu $t2, $t3, $a0		# Add multiplier index to our original array location and store address into $t2.
+		#addu $t2, $t3, $a0		# Add multiplier index to our original array location and store address into $t2.
 	
-		sw $s6, 0($t2)		# Store second temp value into our first index location.
+		sw $s6, -4($t2)		# Store second temp value into our first index location.
 
 		j reverse_swap 		# Jump back to our reverse swap to cycle through again and determine if we must continue decrementing.
 		nop		
