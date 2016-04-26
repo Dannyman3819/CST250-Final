@@ -1,32 +1,26 @@
 bubble_sort:
-	addiu $s0, $0, 0 #index of number being compared to (changes each Pass)
-	addiu $s1, $0, 1 #index of number being compared on (changes each Pass)
-	addiu $s4, $0, 0	
-doPass: #input- $s4,
-	beq $s1, $a1, passDone	#test if we are done
+	addu $s0, $0, $a0 #address of first number
+	addu $s1, $0, $a0 #address of second number
+	addiu $s4, $0, 0 #swap register	
+	addiu $t4, $0, 4 #constant
+	addiu $t5, $0, 1 #constant
+	addu $s1, $s1, $t4 #offset addres to work on second number
+	addiu $s5, $0, 1 #index counter
+doPass:
+	beq $s5, $a1, passDone	#test if we are done
 	nop
-	addiu $t4, $0, 4 #start getting number
-	mullo $t3, $t4, $s0
-	addu $t2, $t3, $a0
-	lw $s2, 0($t2)
-	mullo $t3, $t4, $s1
-	addu $t2, $t3, $a0
-	lw $s3, 0($t2)
-	slt $t0, $s3, $s2
+	lw $s2, 0($s0)      #$s2 holds first number
+	lw $s3, 0($s1)      #$s3 hold second number
+	slt $t0, $s3, $s2   
 	beq $t0, $0, dontSwap
 	nop
 		addiu $s4, $0, 1 #set swap register
-		addiu $t4, $0, 4
-		mullo $t3, $t4, $s1
-		addu $t2, $t3, $a0
-		sw $s2, 0($t2)
-		mullo $t3, $t4, $s0
-		addu $t2, $t3, $a0
-		sw $s3, 0($t2)
+		sw $s2, 0($s1)
+		sw $s3, 0($s0)
 	dontSwap:
-	addiu $t0, $0, 1
-	addu $s0, $s0, $t0
-	addu $s1, $s1, $t0
+	addu $s0, $s0, $t4 #add 4 to first address
+	addu $s1, $s1, $t4 #add 4 to second address
+	addu $s5, $s5, $t5 #increment index
 	j doPass
 	nop
 passDone:
@@ -34,7 +28,5 @@ passDone:
 	nop
 		return 
 	notDone:
-	addiu $t0, $0, 1
-	addu $s0, $t0, $s0 #increment main pass index
 	j bubble_sort
 	nop
