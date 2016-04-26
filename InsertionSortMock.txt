@@ -89,7 +89,7 @@ reverse_swap:
 		addiu $s5, $s5, -1		# Decrement our first index location so we can start going down.
 #Load s6 with s6-1
 #subu $s6, $s6, $t6 #$t6=1
-		addiu $s6, $s6, -1		# Decrement our second index location so we can start going down.
+		#addiu $s6, $s6, -1		# Decrement our second index location so we can start going down.
 # May be able to take this portion out.
 		mullo $t3, $t4, $s5		# Multiply our incrementer by first temp index location and store into $t3
 
@@ -109,9 +109,9 @@ reverse_swap:
       		nop			# Else lets swap
 
 		#swapping
-		mullo $t3, $t4, $s6		# Multiply our second temp index by incrementer to retrieve index value.
+		#mullo $t3, $t4, $s6		# Multiply our second temp index by incrementer to retrieve index value.
 
-		addu $t2, $t3, $a0		# Add multiplier index to our $a0 and store into $t2; memory location that is.
+		#addu $t2, $t3, $a0		# Add multiplier index to our $a0 and store into $t2; memory location that is.
 
 		sw $s5, 0($t2)		# Store the first temp index value into $t2 memory location of our second index.
 
@@ -134,3 +134,68 @@ notDoneYet:
 	addu $s0, $t0, $s0			# Increment main pass index
 	j insertion_sort
 	nop	
+
+
+
+
+
+
+
+
+
+
+
+
+NEW CODE REVISION
+
+
+
+
+
+
+insertion_sort:
+	addu $s0, $0, $a0 #address of first number
+	addu $s1, $0, $a0 #address of second number
+	addiu $s4, $0, 0 #swap register	
+	addiu $t4, $0, 4 #constant
+	addiu $t5, $0, 1 #constant
+	addu $s1, $s1, $t4 #offset addres to work on second number
+	addiu $s5, $0, 1 #index counter
+insertionPassing:
+	beq $s5, $a1, passDoneInsertion	#test if we are done
+	nop
+	lw $s2, 0($s0)      #$s2 holds first number
+	lw $s3, 0($s1)      #$s3 hold second number
+	slt $t0, $s3, $s2   #perform comparison of the program to see if we want to swap values.
+	beq $t0, $0, dontSwapInsertion
+	nop
+		addiu $s4, $0, 1 #set swap register
+		sw $s2, 0($s1)	# store first value in second index.
+		sw $s3, 0($s0)	# store second value in first index.
+		addiu $t9, $0, 0	# Set decrement flag
+		addu $t6, $0, $s0	# Copy our current address into temp register for decrementing.
+	reverse_swap:
+		lw $s2, -4($t6)	# Load first value by decrementing down 
+		lw $s3, 0($t6)	# Load second value by retrieving current standing of what was our original first index location.
+		slt $t9, $s3, $s2	# Perform comparison check
+		beq $t9, $0, insertionPassing	# Here we have loaded our values, we perform a branch to see if we want to follow through with reverse
+		nop			# swapping of values, or get new values.
+		sw $s2, 0($t6)	# Store value assuming we want to swap, here we store first value in second index.
+		sw $s3, -4($t6)	# Store second value in first index of decrementing.
+		subu $t6, $t6, $t4	# Redecrement our index and perform a check at the beginning of reverse_swap method to see if we want to swap.
+		j reverse_swap
+		nop
+
+	dontSwapInsertion:
+	addu $s0, $s0, $t4 #add 4 to first address
+	addu $s1, $s1, $t4 #add 4 to second address
+	addu $s5, $s5, $t5 #increment index
+	j insertionPassing
+	nop
+passDoneInsertion:
+	bne $s4, $0, notFinished #test if swap bit is low, if so then we are
+	nop
+		return 
+	notFinished:
+	j insertion_sort	# jumpt back to beginning of insertion sort so we can perform one last run through to ensure we sorted everything, 
+	nop		# specifically last values of the list.
