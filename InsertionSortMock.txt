@@ -31,8 +31,7 @@ insertion_sort:
 getInsertionNumber:
 
 	beq $s1, $a1, finishIt		# Test if we are done by having $s1 index at end.
-	nop 
-
+	# No need for NOP
 	addiu $t4, $0, 4			# Initialize our incrementer with value 4.
 
 	mullo $t3, $t4, $s0			# Multiply to location of our index
@@ -48,11 +47,11 @@ getInsertionNumber:
 # memory address of $a0 index.
 # Store the value into output index 1.
 
-	mullo $t3, $t4, $s1			# Multiply our second index value by our incrementer of 4 and store that into $t3 (multiplier location)
+	#mullo $t3, $t4, $s1			# Multiply our second index value by our incrementer of 4 and store that into $t3 (multiplier location)
 
-	addu $t2, $t3, $a0			# Add multiplier index location to original array and store that into $t2 as before.
+	#addu $t2, $t3, $a0			# Add multiplier index location to original array and store that into $t2 as before.
 
-	lw $s3, 0($t2)			# Fully store value into output index 2 for final value.
+	lw $s3, 4($t2)			# Fully store value into output index 2 for final value.
 
 	slt $t0, $s3, $s2			# Is it the case that $s3 < $s2 $t0 = 1, we perform our check to see if we wish to swap. 
 					# Else we will regather values by incrementing on.
@@ -60,19 +59,17 @@ getInsertionNumber:
 	nop	
 		addiu $s4, $0, 1		# Initialize swapping register.
 
-		addiu $t4, $0, 4		# May be able to take this portion out.
-
 		mullo $t3, $t4, $s1		# Multiply for index location of second index, which is were we will store the final first value.
 	
 		addu $t2, $t3, $a0		# Add to get to our memory location for first index, to which we will insert final first value.
 	
 		sw $s2, 0($t2)		# Store final first value in memory location of second value.
 					
-		mullo $t3, $t4, $s0		# Multiply to retrieve index location for first index.
+		#mullo $t3, $t4, $s0		# Multiply to retrieve index location for first index.
 
-		addu $t2, $t3, $a0		# Add incrementer from multiplied index to original array and store to $t2
+		#addu $t2, $t3, $a0		# Add incrementer from multiplied index to original array and store to $t2
 
-		sw $s3, 0($t2)		# Store final second value in memory location of first index.
+		sw $s3, -4($t2)		# Store final second value in memory location of first index.
 
 dontSwapInsertion:					# Don't swap is essentially the else statement from our beq $t0, $0, dontSwap conditional.
 # Store final value for location of second value.
@@ -87,9 +84,6 @@ dontSwapInsertion:					# Don't swap is essentially the else statement from our b
 	nop
 
 reverse_swap:
-
-		addiu $t4, $0, 4
-#Load s5 with s5-1
 #subu $s5, $s5, $t6 # $t6=1
 #OR
 		addiu $s5, $s5, -1		# Decrement our first index location so we can start going down.
@@ -139,4 +133,4 @@ notDoneYet:
 	
 	addu $s0, $t0, $s0			# Increment main pass index
 	j insertion_sort
-	nop
+	nop	
